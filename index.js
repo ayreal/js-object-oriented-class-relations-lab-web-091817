@@ -1,9 +1,9 @@
 let store = { drivers: [], passengers: [], trips: [] };
 
-const makeDriver = () => {
+const Driver = (() => {
   let id = 1;
 
-  return class {
+  return class Driver {
     constructor(name) {
       this.name = name;
       this.id = id;
@@ -11,26 +11,33 @@ const makeDriver = () => {
       store.drivers.push(this);
     }
 
+    static all() {
+      return store.drivers;
+    }
     // filter to return join table results
     trips() {
       return store.trips.filter(trip => trip.driverId === this.id);
     }
     // use those results to map through to the has-many relationship
     passengers() {
-      return this.trips().map(trip => trip.passenger);
+      return this.trips().map(trip => trip.passenger());
     }
   };
-};
+})();
 
-const makePassenger = () => {
+const Passenger = (() => {
   let id = 1;
 
-  return class {
+  return class Passenger {
     constructor(name) {
       this.name = name;
       this.id = id;
       id++;
       store.passengers.push(this);
+    }
+
+    static all() {
+      return store.passengers;
     }
 
     // filter to return join table results
@@ -43,18 +50,22 @@ const makePassenger = () => {
       return this.trips().map(trip => trip.driver());
     }
   };
-};
+})();
 
-const makeTrip = () => {
+const Trip = (() => {
   let id = 1;
 
-  return class {
+  return class Trip {
     constructor(driver, passenger) {
-      this.id = id;
-      id++;
       this.driverId = driver.id;
       this.passengerId = passenger.id;
+      this.id = id;
+      id++;
       store.trips.push(this);
+    }
+
+    static all() {
+      return store.trips;
     }
 
     driver() {
@@ -67,14 +78,4 @@ const makeTrip = () => {
       );
     }
   };
-};
-
-// invoking the functions to make the actual classes
-
-const Driver = makeDriver();
-const Passenger = makePassenger();
-const Trip = makeTrip();
-
-// you can create a new instance afterward with
-// const someDriver = new Driver("name")
-// must invoke methods as well eg someDriver.trips()
+})();
